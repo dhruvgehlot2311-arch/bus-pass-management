@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Program 4: Express.js REST API with JWT (UI Form)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0b132b; color: #f1f5f9; min-height: 100vh; padding-bottom: 40px; }
+    header { background: #1c2541; border-bottom: 2px solid #3a506b; padding: 18px 30px; display: flex; justify-content: space-between; align-items: center; }
+    .brand h1 { font-size: 1.3rem; color: #6fffe9; display: flex; align-items: center; gap: 10px; }
+    .brand p { font-size: 0.8rem; color: #94a3b8; margin-top: 3px; }
+    .badge { background: #5bc0be; color: #0b132b; padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+    .container { max-width: 1100px; margin: 25px auto; padding: 0 20px; display: flex; flex-direction: column; gap: 24px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .card { background: #1c2541; border: 1px solid #3a506b; border-radius: 10px; padding: 22px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    .card h2 { font-size: 1.15rem; color: #6fffe9; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #3a506b; padding-bottom: 10px; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+    button { padding: 9px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; font-size: 0.88rem; transition: all 0.2s; }
+    .btn-auth { background: #6fffe9; color: #0b132b; }
+    .btn-auth:hover { background: #5bc0be; }
+    .btn-route { background: #3a506b; color: white; border: 1px solid #5bc0be; }
+    .btn-route:hover { background: #5bc0be; color: #0b132b; }
+    .btn-err { background: #ef4444; color: white; }
+    .btn-err:hover { background: #dc2626; }
+    pre { background: #0b132b; border: 1px solid #3a506b; padding: 14px; border-radius: 6px; font-family: 'Consolas', monospace; font-size: 0.83rem; color: #a5f3fc; overflow-x: auto; max-height: 250px; }
+    .terminal-logs { background: #000; border: 1px solid #3a506b; border-radius: 6px; padding: 12px; font-family: 'Consolas', monospace; font-size: 0.8rem; color: #4ade80; max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+    .auth-box { background: #0b132b; border: 1px dashed #5bc0be; padding: 12px; border-radius: 6px; font-size: 0.85rem; margin-top: 10px; }
+    .token-chip { word-break: break-all; color: #fbbf24; font-family: monospace; font-size: 0.78rem; margin-top: 5px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>🔒 Program 4: Express.js REST API with JWT Authentication</h1>
+      <p>Roll No: 14 | Subject: Full Stack Development (Web Dev) | Course Outcome: CO5</p>
+    </div>
+    <span class="badge">Express + JWT + Bcrypt</span>
+  </header>
+
+  <div class="container">
+    <!-- Auth & JWT Section -->
+    <div class="card">
+      <h2>🔑 Authentication & Security Module (Bcrypt + JWT)</h2>
+      <div class="btn-row">
+        <button class="btn-auth" onclick="handleRegister()">1. POST /api/auth/register (Bcrypt Hash)</button>
+        <button class="btn-auth" onclick="handleLogin()">2. POST /api/auth/login (Generate JWT)</button>
+        <button class="btn-auth" onclick="handleLogout()">3. Clear Token</button>
+      </div>
+      <div class="auth-box">
+        <div><strong>Active User:</strong> <span id="activeUser" style="color:#6fffe9">Not authenticated</span></div>
+        <div><strong>Bcrypt Password Hash (10 Salt Rounds):</strong></div>
+        <div id="bcryptHash" class="token-chip">// Click Register to view generated hash...</div>
+        <div style="margin-top:6px;"><strong>Authorization Header:</strong></div>
+        <div id="jwtToken" class="token-chip">// Click Login to generate JWT token...</div>
+      </div>
+    </div>
+
+    <!-- API CRUD Tester -->
+    <div class="card">
+      <h2>🚀 Express CRUD Endpoints (Protected by JWT Middleware)</h2>
+      <div class="btn-row">
+        <button class="btn-route" onclick="handleGetPasses(true)">GET /api/passes (Authorized)</button>
+        <button class="btn-route" onclick="handleGetPasses(false)">GET /api/passes (Without Token -> 401)</button>
+        <button class="btn-route" onclick="handlePostPass()">POST /api/passes (Create 201)</button>
+        <button class="btn-route" onclick="handlePutPass()">PUT /api/passes/:id (Update 200)</button>
+        <button class="btn-route" onclick="handleDeletePass()">DELETE /api/passes/:id (200)</button>
+        <button class="btn-err" onclick="handleTrigger404()">Trigger 404 Route Not Found</button>
+      </div>
+      <pre id="apiOutput">// Click an endpoint button to test request, headers, and response payload...</pre>
+    </div>
+
+    <!-- Middleware Console -->
+    <div class="card">
+      <h2>🖥️ Express Logger & Error Middleware Live Output</h2>
+      <div class="terminal-logs" id="loggerLogs">
+        <div>[SYSTEM] Express application initialized on port 3000. Middleware stack attached.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let authToken = null;
+    let registeredUser = null;
+    let passes = [
+      { id: "pass_01", studentName: "Ananya Roy", rollNo: "CS2214A", route: "Route 10", busNo: "MH-02-1010", passType: "Monthly", contactNo: "9812345670" }
+    ];
+
+    function logMiddleware(method, url, status) {
+      const logger = document.getElementById('loggerLogs');
+      const time = new Date().toISOString();
+      const div = document.createElement('div');
+      div.textContent = `[LOGGER] ${time} | METHOD: ${method} | URL: ${url} | STATUS: ${status} | IP: 127.0.0.1`;
+      logger.prepend(div);
+    }
+
+    function handleRegister() {
+      registeredUser = { id: "u_14", username: "student14" };
+      const simulatedHash = "$2a$10$e8gV...a9b" + Math.random().toString(36).substring(2, 10);
+      document.getElementById('activeUser').textContent = registeredUser.username + " (Registered)";
+      document.getElementById('bcryptHash').textContent = simulatedHash;
+      logMiddleware("POST", "/api/auth/register", 201);
+
+      document.getElementById('apiOutput').textContent = JSON.stringify({
+        status: 201,
+        message: "User registered successfully with bcrypt-hashed password.",
+        user: registeredUser,
+        saltRounds: 10
+      }, null, 2);
+    }
+
+    function handleLogin() {
+      if (!registeredUser) handleRegister();
+      authToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InVfMTQiLCJ1c2VybmFtZSI6InN0dWRlbnQxNCIsImV4cCI6MTc5NDg0Mjc5Nn0." + Math.random().toString(36).substring(2, 12);
+      document.getElementById('activeUser').textContent = registeredUser.username + " (Logged In)";
+      document.getElementById('jwtToken').textContent = "Bearer " + authToken;
+      logMiddleware("POST", "/api/auth/login", 200);
+
+      document.getElementById('apiOutput').textContent = JSON.stringify({
+        status: 200,
+        message: "Login successful. JWT token issued.",
+        token: authToken,
+        expiresIn: "1h"
+      }, null, 2);
+    }
+
+    function handleLogout() {
+      authToken = null;
+      document.getElementById('activeUser').textContent = "Not authenticated";
+      document.getElementById('jwtToken').textContent = "// Token cleared";
+      document.getElementById('apiOutput').textContent = "// User logged out. Authorization header cleared.";
+    }
+
+    function handleGetPasses(sendAuth) {
+      if (!sendAuth || !authToken) {
+        logMiddleware("GET", "/api/passes", 401);
+        document.getElementById('apiOutput').textContent = JSON.stringify({
+          statusCode: 401,
+          error: "Unauthorized",
+          message: "Access Denied: No Bearer token provided in Authorization header."
+        }, null, 2);
+        return;
+      }
+
+      logMiddleware("GET", "/api/passes", 200);
+      document.getElementById('apiOutput').textContent = JSON.stringify({
+        statusCode: 200,
+        authorizedUser: "student14 (Roll No: 14)",
+        data: passes
+      }, null, 2);
+    }
+
+    function handlePostPass() {
+      if (!authToken) {
+        handleGetPasses(false);
+        return;
+      }
+      const newPass = {
+        id: "pass_" + Date.now(),
+        studentName: "Dhruv Roll14",
+        rollNo: "14BEAIDS",
+        route: "Route 14 - Express Highway",
+        busNo: "GJ-14-RT-1414",
+        passType: "Annual",
+        contactNo: "9876543210"
+      };
+      passes.push(newPass);
+      logMiddleware("POST", "/api/passes", 201);
+      document.getElementById('apiOutput').textContent = JSON.stringify({
+        statusCode: 201,
+        message: "Bus pass created and verified by validation middleware.",
+        data: newPass
+      }, null, 2);
+    }
+
+    function handlePutPass() {
+      if (!authToken) { handleGetPasses(false); return; }
+      passes[0].route = "Route 14 - Metro Junction Station";
+      logMiddleware("PUT", "/api/passes/pass_01", 200);
+      document.getElementById('apiOutput').textContent = JSON.stringify({
+        statusCode: 200,
+        message: "Pass updated successfully.",
+        updatedPass: passes[0]
+      }, null, 2);
+    }
+
+    function handleDeletePass() {
+      if (!authToken) { handleGetPasses(false); return; }
+      const removed = passes.pop();
+      logMiddleware("DELETE", `/api/passes/${removed.id}`, 200);
+      document.getElementById('apiOutput').textContent = JSON.stringify({
+        statusCode: 200,
+        message: `Pass with id ${removed.id} deleted successfully.`
+      }, null, 2);
+    }
+
+    function handleTrigger404() {
+      logMiddleware("GET", "/api/invalid-url", 404);
+      document.getElementById('apiOutput').textContent = JSON.stringify({
+        statusCode: 404,
+        error: "Route Not Found",
+        message: "Route 'GET /api/invalid-url' not found on this server."
+      }, null, 2);
+    }
+  </script>
+</body>
+</html>

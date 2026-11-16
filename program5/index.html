@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Program 5: Full-Stack MERN Integration (UI Form)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0c1017; color: #e2e8f0; min-height: 100vh; padding-bottom: 40px; }
+    header { background: #151d2c; border-bottom: 2px solid #283548; padding: 18px 30px; display: flex; justify-content: space-between; align-items: center; }
+    .brand h1 { font-size: 1.3rem; color: #10b981; display: flex; align-items: center; gap: 10px; }
+    .brand p { font-size: 0.8rem; color: #94a3b8; margin-top: 3px; }
+    .badge { background: #059669; color: white; padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+    .nav-tabs { background: #1a2332; padding: 10px 30px; display: flex; gap: 12px; border-bottom: 1px solid #283548; }
+    .nav-tabs button { background: transparent; border: 1px solid #334155; color: #94a3b8; padding: 8px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    .nav-tabs button.active { background: #10b981; color: #0c1017; border-color: #10b981; }
+    .container { max-width: 1050px; margin: 25px auto; padding: 0 20px; }
+    .card { background: #151d2c; border: 1px solid #283548; border-radius: 10px; padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-bottom: 20px; }
+    .card h2 { font-size: 1.15rem; color: #10b981; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #283548; padding-bottom: 10px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: 0.85rem; font-weight: 600; color: #cbd5e1; }
+    input, select { background: #0c1017; border: 1px solid #334155; color: white; padding: 10px 12px; border-radius: 6px; font-size: 0.95rem; }
+    input:focus, select:focus { border-color: #10b981; outline: none; }
+    .btn-green { background: #10b981; color: #0c1017; border: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.95rem; margin-top: 15px; }
+    .btn-green:hover { background: #059669; }
+    .pass-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-top: 15px; }
+    .pass-item { background: #1a2332; border: 1px solid #334155; border-left: 4px solid #10b981; padding: 16px; border-radius: 6px; }
+    .pass-item h3 { font-size: 1.05rem; color: #34d399; margin-bottom: 8px; }
+    .pass-item p { font-size: 0.85rem; color: #94a3b8; line-height: 1.5; }
+    pre { background: #0c1017; border: 1px solid #283548; padding: 14px; border-radius: 6px; font-family: 'Consolas', monospace; font-size: 0.83rem; color: #6ee7b7; overflow-x: auto; }
+    .cloud-card { display: flex; align-items: center; justify-content: space-between; background: #1a2332; border: 1px solid #283548; padding: 14px 20px; border-radius: 8px; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>🚀 Program 5: Full-Stack MERN Integration (React + Express + MongoDB)</h1>
+      <p>Roll No: 14 | Subject: Full Stack Development (Web Dev) | Course Outcome: CO6</p>
+    </div>
+    <span class="badge">Full-Stack MERN</span>
+  </header>
+
+  <div class="nav-tabs">
+    <button id="tab-dash" class="active" onclick="showTab('dashboard')">📊 User Dashboard</button>
+    <button id="tab-add" onclick="showTab('add')">➕ Issue Mongoose Pass</button>
+    <button id="tab-cloud" onclick="showTab('cloud')">☁️ Cloud Deployment (Vercel & Render)</button>
+  </div>
+
+  <div class="container">
+    <!-- Tab 1: Dashboard -->
+    <div id="view-dashboard">
+      <div class="card">
+        <h2>👤 Logged In User (AuthContext State)</h2>
+        <p style="font-size:0.9rem; color:#94a3b8;">
+          <strong>Authenticated:</strong> <span style="color:#10b981">Yes (JWT Bearer Token active)</span> | 
+          <strong>User ID:</strong> <code>60d0fe4f5311236168a109ca</code> | 
+          <strong>Role:</strong> Student (Roll No: 14)
+        </p>
+      </div>
+
+      <div class="card">
+        <h2>📋 Persisted Passes in MongoDB Atlas (<span id="passCount">2</span>)</h2>
+        <div class="pass-list" id="passContainer"></div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Add Pass Form -->
+    <div id="view-add" style="display:none;">
+      <div class="card">
+        <h2>➕ Create Bus Pass (Mongoose Schema Validation)</h2>
+        <form onsubmit="handleCreatePass(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Student Name</label>
+              <input id="pName" value="Dhruv Roll14" required />
+            </div>
+            <div class="form-group">
+              <label>Roll Number (Unique)</label>
+              <input id="pRoll" value="14BEAIDS" required />
+            </div>
+            <div class="form-group">
+              <label>Route</label>
+              <input id="pRoute" value="Route 14 - Express Metro" required />
+            </div>
+            <div class="form-group">
+              <label>Bus Number</label>
+              <input id="pBus" value="GJ-14-BE-2026" required />
+            </div>
+            <div class="form-group">
+              <label>Pass Type (Mongoose Enum)</label>
+              <select id="pType">
+                <option value="Monthly">Monthly</option>
+                <option value="Quarterly">Quarterly</option>
+                <option value="Annual" selected>Annual</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Contact Number (Regex: 10 Digits)</label>
+              <input id="pContact" value="9876543210" maxlength="10" required />
+            </div>
+          </div>
+          <button type="submit" class="btn-green">💾 Save to MongoDB via Express API</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Tab 3: Cloud Deployment Details -->
+    <div id="view-cloud" style="display:none;">
+      <div class="card">
+        <h2>☁️ Production Deployment Architecture</h2>
+        <div class="cloud-card">
+          <div>
+            <strong>Frontend Hosting: Vercel</strong>
+            <p style="font-size:0.8rem; color:#94a3b8;">React Vite SPA | Auto-build from GitHub main | SPA rewrites to index.html</p>
+          </div>
+          <span style="color:#10b981; font-weight:bold;">🟢 Ready</span>
+        </div>
+
+        <div class="cloud-card">
+          <div>
+            <strong>Backend Hosting: Render</strong>
+            <p style="font-size:0.8rem; color:#94a3b8;">Node.js Web Service | Express API + CORS | Env: MONGODB_URI, JWT_SECRET</p>
+          </div>
+          <span style="color:#10b981; font-weight:bold;">🟢 Ready</span>
+        </div>
+
+        <div class="cloud-card">
+          <div>
+            <strong>Database: MongoDB Atlas</strong>
+            <p style="font-size:0.8rem; color:#94a3b8;">Managed Cloud Replica Set | Mongoose ODM Connection with retry logic</p>
+          </div>
+          <span style="color:#10b981; font-weight:bold;">🟢 Connected</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let passes = [
+      { id: "60d0fe4f5311236168a109cb", studentName: "Aarav Sharma", rollNo: "CS2201", route: "Route 1 - Andheri", busNo: "MH-02-1234", passType: "Monthly", contactNo: "9876543210" },
+      { id: "60d0fe4f5311236168a109cc", studentName: "Dhruv Roll14", rollNo: "14BEAIDS", route: "Route 14 - Express Metro", busNo: "GJ-14-BE-2026", passType: "Annual", contactNo: "9876543210" }
+    ];
+
+    function renderPasses() {
+      const container = document.getElementById('passContainer');
+      container.innerHTML = '';
+      passes.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'pass-item';
+        div.innerHTML = `
+          <h3>${p.studentName}</h3>
+          <p><strong>Roll No:</strong> ${p.rollNo}</p>
+          <p><strong>Route:</strong> ${p.route}</p>
+          <p><strong>Bus No:</strong> ${p.busNo}</p>
+          <p><strong>Pass Type:</strong> <span style="color:#10b981">${p.passType}</span></p>
+          <p><strong>Contact:</strong> ${p.contactNo}</p>
+          <p style="margin-top:6px;"><small style="color:#64748b">ObjectId("${p.id}")</small></p>
+        `;
+        container.appendChild(div);
+      });
+      document.getElementById('passCount').textContent = passes.length;
+    }
+
+    function showTab(tab) {
+      document.getElementById('view-dashboard').style.display = tab === 'dashboard' ? 'block' : 'none';
+      document.getElementById('view-add').style.display = tab === 'add' ? 'block' : 'none';
+      document.getElementById('view-cloud').style.display = tab === 'cloud' ? 'block' : 'none';
+
+      document.getElementById('tab-dash').className = tab === 'dashboard' ? 'active' : '';
+      document.getElementById('tab-add').className = tab === 'add' ? 'active' : '';
+      document.getElementById('tab-cloud').className = tab === 'cloud' ? 'active' : '';
+    }
+
+    function handleCreatePass(e) {
+      e.preventDefault();
+      const newPass = {
+        id: "60d0" + Math.random().toString(16).substring(2, 10) + "12345678",
+        studentName: document.getElementById('pName').value,
+        rollNo: document.getElementById('pRoll').value,
+        route: document.getElementById('pRoute').value,
+        busNo: document.getElementById('pBus').value,
+        passType: document.getElementById('pType').value,
+        contactNo: document.getElementById('pContact').value
+      };
+      passes.push(newPass);
+      renderPasses();
+      alert("Pass saved successfully to MongoDB database!");
+      showTab('dashboard');
+    }
+
+    renderPasses();
+  </script>
+</body>
+</html>

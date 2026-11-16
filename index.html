@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bus Pass Management System — All 5 Programs UI Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #f8fafc; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    
+    /* Top Header */
+    header { background: #1e293b; border-bottom: 2px solid #334155; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+    .header-left { display: flex; align-items: center; gap: 15px; }
+    .logo { font-size: 1.6rem; }
+    .title h1 { font-size: 1.15rem; color: #38bdf8; font-weight: 700; }
+    .title p { font-size: 0.75rem; color: #94a3b8; }
+    .meta-badge { background: #0284c7; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.78rem; font-weight: 700; }
+    
+    /* Navigation Bar */
+    nav { background: #0b1120; border-bottom: 1px solid #1e293b; display: flex; gap: 8px; padding: 8px 24px; overflow-x: auto; }
+    nav button { background: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 8px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; white-space: nowrap; }
+    nav button:hover { background: #334155; color: white; }
+    nav button.active { background: #0284c7; color: white; border-color: #38bdf8; box-shadow: 0 0 10px rgba(56,189,248,0.3); }
+
+    /* Frame container */
+    .frame-container { flex: 1; width: 100%; height: calc(100vh - 110px); position: relative; background: #000; }
+    iframe { width: 100%; height: 100%; border: none; display: block; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <span class="logo">🚌</span>
+      <div class="title">
+        <h1>Bus Pass Management System — Interactive UI Portal</h1>
+        <p>Roll No: 14 | B.E. (AI & DS) | Semester V | Full Stack Development (Web Dev)</p>
+      </div>
+    </div>
+    <span class="meta-badge">CO1 – CO6 Complete</span>
+  </header>
+
+  <nav>
+    <button class="active" onclick="switchProgram('program1/index.html', this)">
+      <span>🌐</span> Program 1: Browser Interface (CO1, CO2)
+    </button>
+    <button onclick="switchProgram('program2/standalone_preview.html', this)">
+      <span>⚛️</span> Program 2: React App (CO3)
+    </button>
+    <button onclick="switchProgram('program3/index.html', this)">
+      <span>⚡</span> Program 3: Node.js Utility (CO4)
+    </button>
+    <button onclick="switchProgram('program4/index.html', this)">
+      <span>🔒</span> Program 4: Express REST API (CO5)
+    </button>
+    <button onclick="switchProgram('program5/index.html', this)">
+      <span>🚀</span> Program 5: Full-Stack MERN (CO6)
+    </button>
+  </nav>
+
+  <div class="frame-container">
+    <iframe id="mainFrame" src="program1/index.html"></iframe>
+  </div>
+
+  <script>
+    function switchProgram(url, btn) {
+      document.getElementById('mainFrame').src = url;
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+  </script>
+</body>
+</html>

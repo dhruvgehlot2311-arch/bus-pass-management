@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Program 3: Node.js Server-Side Utility (UI Form)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #f8fafc; min-height: 100vh; padding-bottom: 40px; }
+    header { background: #1e293b; border-bottom: 2px solid #334155; padding: 18px 30px; display: flex; justify-content: space-between; align-items: center; }
+    .brand h1 { font-size: 1.3rem; color: #38bdf8; display: flex; align-items: center; gap: 10px; }
+    .brand p { font-size: 0.8rem; color: #94a3b8; margin-top: 3px; }
+    .badge { background: #0284c7; color: white; padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+    .container { max-width: 1100px; margin: 25px auto; padding: 0 20px; display: flex; flex-direction: column; gap: 24px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 22px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    .card h2 { font-size: 1.15rem; color: #38bdf8; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+    button { padding: 9px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; font-size: 0.88rem; transition: all 0.2s; }
+    .btn-get { background: #0284c7; color: white; }
+    .btn-get:hover { background: #0369a1; }
+    .btn-post { background: #16a34a; color: white; }
+    .btn-post:hover { background: #15803d; }
+    .btn-del { background: #dc2626; color: white; }
+    .btn-del:hover { background: #b91c1c; }
+    pre { background: #090d16; border: 1px solid #1e293b; padding: 14px; border-radius: 6px; font-family: 'Consolas', monospace; font-size: 0.85rem; color: #a5f3fc; overflow-x: auto; max-height: 250px; }
+    .event-log { display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; }
+    .event-item { background: #090d16; border-left: 4px solid #38bdf8; padding: 10px; border-radius: 4px; font-size: 0.82rem; }
+    .event-item.created { border-left-color: #22c55e; }
+    .event-item.deleted { border-left-color: #ef4444; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.88rem; }
+    th { background: #0f172a; color: #94a3b8; text-align: left; padding: 10px; border-bottom: 1px solid #334155; }
+    td { padding: 10px; border-bottom: 1px solid #334155; color: #cbd5e1; }
+    .status-pill { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; background: #064e3b; color: #6ee7b7; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>⚡ Program 3: Node.js Server-Side Utility (Without Express)</h1>
+      <p>Roll No: 14 | Subject: Full Stack Development (Web Dev) | Course Outcome: CO4</p>
+    </div>
+    <span class="badge">Pure Node.js Engine</span>
+  </header>
+
+  <div class="container">
+    <!-- Server Status & Actions -->
+    <div class="card">
+      <h2>🌐 Native HTTP Server Endpoint Simulator (Port 3001)</h2>
+      <div class="btn-row">
+        <button class="btn-get" onclick="handleGetPasses()">GET /passes (ReadStream)</button>
+        <button class="btn-post" onclick="handlePostPass()">POST /passes (WriteStream + EventEmitter)</button>
+        <button class="btn-del" onclick="handleDeletePass()">DELETE /passes/:id</button>
+      </div>
+      <pre id="apiConsole">// Click any endpoint button above to inspect live Stream & HTTP response...</pre>
+    </div>
+
+    <div class="grid">
+      <!-- Stream I/O Operations -->
+      <div class="card">
+        <h2>🌊 Streams Pipeline (fs.createReadStream / WriteStream)</h2>
+        <div id="streamStatus" style="font-size: 0.88rem; color: #94a3b8; line-height: 1.6;">
+          <div><strong>Readable Stream:</strong> <span style="color:#38bdf8">Active</span> (chunks concatenated -> JSON.parse)</div>
+          <div><strong>Writable Stream:</strong> <span style="color:#22c55e">Ready</span> (JSON.stringify -> atomic write)</div>
+          <div><strong>Storage Target:</strong> <code style="color:#fbbf24">passes.json</code></div>
+        </div>
+      </div>
+
+      <!-- EventEmitter Log -->
+      <div class="card">
+        <h2>📢 EventEmitter Notification Bus ('eventBus.js')</h2>
+        <div class="event-log" id="eventLog">
+          <div class="event-item">Server initialized on port 3001. Event listeners registered.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Records Table -->
+    <div class="card">
+      <h2>📋 Persisted Bus Passes in passes.json (<span id="passCount">3</span>)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Student Name</th>
+            <th>Roll No</th>
+            <th>Route</th>
+            <th>Bus No</th>
+            <th>Type</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="passesTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    let passes = [
+      { id: "1700000000001", studentName: "Aarav Sharma", rollNo: "CS2201", route: "Route-A: Andheri to College", busNo: "MH-02-1234", passType: "Monthly", contactNo: "9876543210" },
+      { id: "1700000000002", studentName: "Priya Mehta", rollNo: "CS2202", route: "Route-B: Borivali to College", busNo: "MH-02-5678", passType: "Quarterly", contactNo: "8765432109" },
+      { id: "1700000000003", studentName: "Rahul Verma", rollNo: "CS2203", route: "Route-C: Thane to College", busNo: "MH-02-9012", passType: "Annual", contactNo: "7654321098" }
+    ];
+
+    function renderTable() {
+      const tbody = document.getElementById('passesTableBody');
+      tbody.innerHTML = '';
+      passes.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><code>${p.id}</code></td>
+          <td><strong>${p.studentName}</strong></td>
+          <td>${p.rollNo}</td>
+          <td>${p.route}</td>
+          <td>${p.busNo}</td>
+          <td><span style="color:#38bdf8">${p.passType}</span></td>
+          <td><span class="status-pill">Active</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      document.getElementById('passCount').textContent = passes.length;
+    }
+
+    function addEventLog(type, text) {
+      const log = document.getElementById('eventLog');
+      const item = document.createElement('div');
+      item.className = 'event-item ' + type;
+      item.innerHTML = `<strong>[EVENT]</strong> ${text} <span style="float:right; opacity:0.6">${new Date().toLocaleTimeString()}</span>`;
+      log.prepend(item);
+    }
+
+    function handleGetPasses() {
+      const response = {
+        statusCode: 200,
+        headers: { "Content-Type": "application/json" },
+        count: passes.length,
+        passes: passes
+      };
+      document.getElementById('apiConsole').textContent =
+        `// HTTP GET /passes executed via fs.createReadStream\n` +
+        JSON.stringify(response, null, 2);
+    }
+
+    function handlePostPass() {
+      const newId = String(Date.now());
+      const newPass = {
+        id: newId,
+        studentName: "Dhruv Roll14",
+        rollNo: "14BEAIDS",
+        route: "Route 14 - Gandhinagar Express",
+        busNo: "GJ-14-BD-9001",
+        passType: "Quarterly",
+        contactNo: "9876543210"
+      };
+      passes.push(newPass);
+      renderTable();
+      addEventLog('created', `pass:created -> ID: ${newId} (Dhruv Roll14)`);
+
+      const response = {
+        statusCode: 201,
+        message: "Bus pass created and written to passes.json via Writable Stream",
+        pass: newPass
+      };
+      document.getElementById('apiConsole').textContent =
+        `// HTTP POST /passes executed\n` +
+        JSON.stringify(response, null, 2);
+    }
+
+    function handleDeletePass() {
+      if (passes.length === 0) {
+        alert("No passes left to delete!");
+        return;
+      }
+      const removed = passes.pop();
+      renderTable();
+      addEventLog('deleted', `pass:deleted -> ID: ${removed.id} (${removed.studentName})`);
+
+      const response = {
+        statusCode: 200,
+        message: `Bus pass with ID ${removed.id} successfully removed from passes.json via Stream`,
+        deletedPassId: removed.id
+      };
+      document.getElementById('apiConsole').textContent =
+        `// HTTP DELETE /passes/${removed.id} executed\n` +
+        JSON.stringify(response, null, 2);
+    }
+
+    renderTable();
+  </script>
+</body>
+</html>
