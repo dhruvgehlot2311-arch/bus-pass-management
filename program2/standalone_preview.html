@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Program 2: React Bus Pass Management (Interactive Browser Preview)</title>
+  <!-- Load React, ReactDOM, and Babel Standalone from CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f4f8; color: #1a237e; min-height: 100vh; }
+    header { background: linear-gradient(135deg, #0d47a1, #1976d2); color: white; padding: 20px 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center; }
+    header h1 { font-size: 1.4rem; font-weight: 700; }
+    header .badge { background: #ff9800; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+    nav { background: #e3f2fd; padding: 12px 32px; display: flex; gap: 16px; border-bottom: 2px solid #bbdefb; }
+    nav button { background: white; border: 1px solid #1976d2; color: #1976d2; padding: 8px 18px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    nav button.active, nav button:hover { background: #1976d2; color: white; }
+    .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+    .card { background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); padding: 25px; margin-bottom: 25px; border: 1px solid #e0e0e0; }
+    .card h2 { color: #0d47a1; margin-bottom: 18px; font-size: 1.3rem; display: flex; align-items: center; gap: 8px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: span 2; }
+    label { font-size: 0.85rem; font-weight: 600; color: #37474f; }
+    input, select { padding: 10px 12px; border: 1px solid #cfd8dc; border-radius: 6px; font-size: 0.95rem; outline: none; }
+    input:focus, select:focus { border-color: #1976d2; box-shadow: 0 0 0 2px rgba(25,118,210,0.15); }
+    .error { color: #d32f2f; font-size: 0.78rem; font-weight: 500; }
+    .btn-submit { background: #2e7d32; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 15px; }
+    .btn-submit:hover { background: #1b5e20; }
+    .search-bar { display: flex; gap: 12px; margin-bottom: 20px; }
+    .search-bar input { flex: 1; }
+    .pass-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .pass-card { background: white; border-radius: 8px; border: 1px solid #bbdefb; border-left: 5px solid #1976d2; padding: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; flex-direction: column; justify-content: space-between; }
+    .pass-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .pass-name { font-size: 1.1rem; font-weight: 700; color: #0d47a1; }
+    .pass-badge { background: #e3f2fd; color: #1565c0; padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; }
+    .pass-details { font-size: 0.88rem; color: #455a64; line-height: 1.6; margin-bottom: 14px; }
+    .pass-actions { display: flex; gap: 10px; justify-content: flex-end; border-top: 1px solid #f0f0f0; padding-top: 10px; }
+    .btn-edit { background: #1976d2; color: white; border: none; padding: 6px 14px; border-radius: 4px; font-size: 0.82rem; cursor: pointer; font-weight: 600; }
+    .btn-delete { background: #d32f2f; color: white; border: none; padding: 6px 14px; border-radius: 4px; font-size: 0.82rem; cursor: pointer; font-weight: 600; }
+    .alert-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; padding: 10px 14px; border-radius: 6px; margin-bottom: 15px; font-weight: 600; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, createContext, useContext } = React;
+
+    // --- Global Context ---
+    const PassContext = createContext();
+
+    function PassProvider({ children }) {
+      const [passes, setPasses] = useState(() => {
+        const saved = localStorage.getItem('react_bus_passes_roll14');
+        return saved ? JSON.parse(saved) : [
+          { id: '1', studentName: 'Aarav Sharma', rollNo: 'CS2201', route: 'Route 1 - Andheri', busNo: 'MH-02-1234', passType: 'Monthly', contactNo: '9876543210' },
+          { id: '2', studentName: 'Priya Mehta', rollNo: 'CS2202', route: 'Route 4 - Borivali', busNo: 'MH-02-5678', passType: 'Quarterly', contactNo: '8765432109' },
+          { id: '3', studentName: 'Dhruv Roll14', rollNo: '14BEAIDS', route: 'Route 14 - Metro Campus Express', busNo: 'GJ-14-EXP-2026', passType: 'Annual', contactNo: '9898014014' }
+        ];
+      });
+
+      useEffect(() => {
+        localStorage.setItem('react_bus_passes_roll14', JSON.stringify(passes));
+      }, [passes]);
+
+      const addPass = (pass) => {
+        const newPass = { ...pass, id: Date.now().toString() };
+        setPasses(prev => [...prev, newPass]);
+      };
+
+      const updatePass = (id, updated) => {
+        setPasses(prev => prev.map(p => p.id === id ? { ...p, ...updated, id } : p));
+      };
+
+      const deletePass = (id) => {
+        setPasses(prev => prev.filter(p => p.id !== id));
+      };
+
+      return (
+        <PassContext.Provider value={{ passes, addPass, updatePass, deletePass }}>
+          {children}
+        </PassContext.Provider>
+      );
+    }
+
+    // --- Form Component (PassForm) ---
+    function PassForm({ editId, onFinish }) {
+      const { passes, addPass, updatePass } = useContext(PassContext);
+      const isEdit = Boolean(editId);
+      const existing = isEdit ? passes.find(p => p.id === editId) : null;
+
+      const [formData, setFormData] = useState({
+        studentName: existing ? existing.studentName : '',
+        rollNo: existing ? existing.rollNo : '',
+        route: existing ? existing.route : '',
+        busNo: existing ? existing.busNo : '',
+        passType: existing ? existing.passType : 'Monthly',
+        contactNo: existing ? existing.contactNo : ''
+      });
+
+      const [errors, setErrors] = useState({});
+      const [msg, setMsg] = useState('');
+
+      const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+      };
+
+      const validate = () => {
+        const errs = {};
+        if (!formData.studentName.trim()) errs.studentName = 'Student name is required.';
+        if (!formData.rollNo.trim()) errs.rollNo = 'Roll number is required.';
+        if (!formData.route.trim()) errs.route = 'Route is required.';
+        if (!formData.busNo.trim()) errs.busNo = 'Bus number is required.';
+        if (!formData.contactNo.trim()) {
+          errs.contactNo = 'Contact number is required.';
+        } else if (!/^\d{10}$/.test(formData.contactNo.trim())) {
+          errs.contactNo = 'Contact number must be exactly 10 digits.';
+        }
+        return errs;
+      };
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        const errs = validate();
+        if (Object.keys(errs).length > 0) {
+          setErrors(errs);
+          return;
+        }
+        setErrors({});
+
+        if (isEdit) {
+          updatePass(editId, formData);
+          setMsg('Pass updated successfully!');
+        } else {
+          addPass(formData);
+          setMsg('New Bus Pass created successfully!');
+          setFormData({ studentName: '', rollNo: '', route: '', busNo: '', passType: 'Monthly', contactNo: '' });
+        }
+        setTimeout(() => { if (onFinish) onFinish(); }, 900);
+      };
+
+      return (
+        <div className="card">
+          <h2>{isEdit ? '✏️ Edit Bus Pass' : '➕ Generate New Bus Pass'}</h2>
+          {msg && <div className="alert-success">{msg}</div>}
+          <form onSubmit={handleSubmit}>
+            <div className="form-grid">
+              <div className="form-group">
+                <label>Student Full Name</label>
+                <input name="studentName" value={formData.studentName} onChange={handleChange} placeholder="e.g. Dhruv Gehlot" />
+                {errors.studentName && <span className="error">{errors.studentName}</span>}
+              </div>
+              <div className="form-group">
+                <label>Roll Number</label>
+                <input name="rollNo" value={formData.rollNo} onChange={handleChange} placeholder="e.g. 14BEAIDS" />
+                {errors.rollNo && <span className="error">{errors.rollNo}</span>}
+              </div>
+              <div className="form-group">
+                <label>Bus Route</label>
+                <input name="route" value={formData.route} onChange={handleChange} placeholder="e.g. Route 14 - Express Ring Road" />
+                {errors.route && <span className="error">{errors.route}</span>}
+              </div>
+              <div className="form-group">
+                <label>Bus Number</label>
+                <input name="busNo" value={formData.busNo} onChange={handleChange} placeholder="e.g. GJ-14-EXP-2026" />
+                {errors.busNo && <span className="error">{errors.busNo}</span>}
+              </div>
+              <div className="form-group">
+                <label>Pass Type</label>
+                <select name="passType" value={formData.passType} onChange={handleChange}>
+                  <option value="Monthly">Monthly</option>
+                  <option value="Quarterly">Quarterly</option>
+                  <option value="Annual">Annual</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Contact Number (10 Digits)</label>
+                <input name="contactNo" value={formData.contactNo} onChange={handleChange} placeholder="e.g. 9876543210" maxLength="10" />
+                {errors.contactNo && <span className="error">{errors.contactNo}</span>}
+              </div>
+            </div>
+            <button type="submit" className="btn-submit">{isEdit ? 'Save Changes' : 'Submit Bus Pass'}</button>
+          </form>
+        </div>
+      );
+    }
+
+    // --- List Component (PassList & PassCard) ---
+    function PassList({ onEdit }) {
+      const { passes, deletePass } = useContext(PassContext);
+      const [search, setSearch] = useState('');
+      const [filter, setFilter] = useState('');
+
+      const filtered = passes.filter(p => {
+        const matchesSearch = p.studentName.toLowerCase().includes(search.toLowerCase()) || p.rollNo.toLowerCase().includes(search.toLowerCase());
+        const matchesFilter = !filter || p.passType === filter;
+        return matchesSearch && matchesFilter;
+      });
+
+      return (
+        <div className="card">
+          <h2>📋 Active Bus Passes ({filtered.length})</h2>
+          <div className="search-bar">
+            <input placeholder="🔍 Search by student name or roll no..." value={search} onChange={e => setSearch(e.target.value)} />
+            <select value={filter} onChange={e => setFilter(e.target.value)}>
+              <option value="">All Pass Types</option>
+              <option value="Monthly">Monthly</option>
+              <option value="Quarterly">Quarterly</option>
+              <option value="Annual">Annual</option>
+            </select>
+          </div>
+          {filtered.length === 0 ? (
+            <p style={{ color: '#78909c', textAlign: 'center', padding: '30px' }}>No bus passes found.</p>
+          ) : (
+            <div className="pass-grid">
+              {filtered.map(pass => (
+                <div key={pass.id} className="pass-card">
+                  <div>
+                    <div className="pass-header">
+                      <div className="pass-name">{pass.studentName}</div>
+                      <span className="pass-badge">{pass.passType}</span>
+                    </div>
+                    <div className="pass-details">
+                      <div><strong>Roll No:</strong> {pass.rollNo}</div>
+                      <div><strong>Route:</strong> {pass.route}</div>
+                      <div><strong>Bus No:</strong> {pass.busNo}</div>
+                      <div><strong>Contact:</strong> {pass.contactNo}</div>
+                    </div>
+                  </div>
+                  <div className="pass-actions">
+                    <button className="btn-edit" onClick={() => onEdit(pass.id)}>Edit</button>
+                    <button className="btn-delete" onClick={() => { if(confirm('Delete pass for ' + pass.studentName + '?')) deletePass(pass.id); }}>Delete</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // --- Main App Component ---
+    function App() {
+      const [activeTab, setActiveTab] = useState('list'); // 'list' | 'add' | 'edit'
+      const [editId, setEditId] = useState(null);
+
+      const handleEdit = (id) => {
+        setEditId(id);
+        setActiveTab('edit');
+      };
+
+      return (
+        <PassProvider>
+          <header>
+            <div>
+              <h1>🚌 Bus Pass Management — React Application</h1>
+              <p style={{ fontSize: '0.82rem', opacity: 0.9 }}>B.E. (AI & DS) | Semester V | Roll No: 14 | Program 2 (CO3)</p>
+            </div>
+            <span className="badge">React 18 SPA</span>
+          </header>
+          <nav>
+            <button className={activeTab === 'list' ? 'active' : ''} onClick={() => setActiveTab('list')}>📋 Pass Listing View</button>
+            <button className={activeTab === 'add' ? 'active' : ''} onClick={() => { setEditId(null); setActiveTab('add'); }}>➕ Add New Pass</button>
+          </nav>
+          <div className="container">
+            {activeTab === 'list' && <PassList onEdit={handleEdit} />}
+            {activeTab === 'add' && <PassForm onFinish={() => setActiveTab('list')} />}
+            {activeTab === 'edit' && <PassForm editId={editId} onFinish={() => setActiveTab('list')} />}
+          </div>
+        </PassProvider>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
