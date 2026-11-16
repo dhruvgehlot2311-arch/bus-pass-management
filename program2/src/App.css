@@ -1,0 +1,579 @@
+/* ============================================================
+   App.css — Bus Pass Management System
+   Theme: Professional blue / white
+   Roll No: 14 | Program 2 of 5
+   ============================================================ */
+
+/* ── CSS Custom Properties (design tokens) ─────────────────── */
+:root {
+  --color-primary       : #1a56db;   /* royal blue */
+  --color-primary-dark  : #1341a8;
+  --color-primary-light : #e8f0fe;
+  --color-accent        : #3b82f6;
+  --color-success       : #16a34a;
+  --color-success-bg    : #dcfce7;
+  --color-error         : #dc2626;
+  --color-error-bg      : #fee2e2;
+  --color-warning       : #d97706;
+  --color-text-primary  : #111827;
+  --color-text-secondary: #6b7280;
+  --color-border        : #d1d5db;
+  --color-bg-page       : #f3f6fb;
+  --color-bg-card       : #ffffff;
+  --color-navbar        : #1a56db;
+  --radius-card         : 12px;
+  --radius-btn          : 8px;
+  --radius-input        : 6px;
+  --shadow-card         : 0 2px 12px rgba(26, 86, 219, 0.10);
+  --shadow-card-hover   : 0 6px 24px rgba(26, 86, 219, 0.18);
+  --font-sans           : 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --transition          : 0.2s ease;
+}
+
+/* ── Reset & base ───────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg-page);
+  color: var(--color-text-primary);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* ── App wrapper ────────────────────────────────────────────── */
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NAVBAR
+═══════════════════════════════════════════════════════════════ */
+.navbar {
+  background-color: var(--color-navbar);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.navbar-icon {
+  font-size: 1.7rem;
+}
+
+.navbar-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: background var(--transition), color var(--transition);
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.nav-link.active {
+  background-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* ── Page meta bar ──────────────────────────────────────────── */
+.page-meta {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.35rem 2rem;
+  text-align: center;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid #c7d7f8;
+}
+
+/* ── Main content ───────────────────────────────────────────── */
+.main-content {
+  flex: 1;
+  padding: 2rem 1.5rem;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.25rem;
+  border: none;
+  border-radius: var(--radius-btn);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+  text-decoration: none;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-dark);
+  box-shadow: 0 4px 12px rgba(26, 86, 219, 0.3);
+}
+
+.btn-secondary {
+  background-color: #e5e7eb;
+  color: var(--color-text-primary);
+}
+
+.btn-secondary:hover {
+  background-color: #d1d5db;
+}
+
+.btn-edit {
+  background-color: #eff6ff;
+  color: var(--color-primary);
+  border: 1px solid #bfdbfe;
+  font-size: 0.88rem;
+  padding: 0.4rem 0.9rem;
+}
+
+.btn-edit:hover {
+  background-color: var(--color-primary-light);
+  border-color: var(--color-primary);
+}
+
+.btn-delete {
+  background-color: #fff1f2;
+  color: var(--color-error);
+  border: 1px solid #fecdd3;
+  font-size: 0.88rem;
+  padding: 0.4rem 0.9rem;
+}
+
+.btn-delete:hover {
+  background-color: #fee2e2;
+  border-color: var(--color-error);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ALERTS / BANNERS
+═══════════════════════════════════════════════════════════════ */
+.alert {
+  padding: 0.75rem 1.1rem;
+  border-radius: var(--radius-input);
+  font-weight: 500;
+  margin-bottom: 1.2rem;
+  font-size: 0.95rem;
+}
+
+.alert-success {
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+  border-left: 4px solid var(--color-success);
+}
+
+.alert-error {
+  background-color: var(--color-error-bg);
+  color: var(--color-error);
+  border-left: 4px solid var(--color-error);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PASS FORM
+═══════════════════════════════════════════════════════════════ */
+.form-container {
+  max-width: 560px;
+  margin: 0 auto;
+  background: var(--color-bg-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 2rem 2.2rem;
+}
+
+.form-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 1.4rem;
+}
+
+.pass-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+/* Individual field wrapper */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.form-group input,
+.form-group select {
+  padding: 0.55rem 0.85rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-input);
+  font-size: 0.95rem;
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  background: #fff;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.12);
+}
+
+/* Input in error state */
+.input-error {
+  border-color: var(--color-error) !important;
+}
+
+.field-error {
+  font-size: 0.8rem;
+  color: var(--color-error);
+  font-weight: 500;
+}
+
+.required {
+  color: var(--color-error);
+  margin-left: 2px;
+}
+
+/* Form action row */
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.4rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PASS LIST
+═══════════════════════════════════════════════════════════════ */
+.list-container {
+  /* fills main-content width */
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.list-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.pass-count {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+}
+
+/* Responsive card grid */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.4rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PASS CARD
+═══════════════════════════════════════════════════════════════ */
+.pass-card {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow var(--transition), transform var(--transition);
+  border: 1px solid #e9edf5;
+}
+
+.pass-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-3px);
+}
+
+/* Card header */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.2rem;
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, #fff 100%);
+  border-bottom: 1px solid #e5ecf8;
+}
+
+.card-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.card-header-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-roll {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+/* Pass-type badge */
+.badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.badge-blue   { background: #dbeafe; color: #1d4ed8; }
+.badge-green  { background: #dcfce7; color: #15803d; }
+.badge-orange { background: #ffedd5; color: #c2410c; }
+.badge-purple { background: #ede9fe; color: #6d28d9; }
+
+/* Card body */
+.card-body {
+  padding: 1rem 1.2rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.card-label {
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  white-space: nowrap;
+  min-width: 90px;
+}
+
+.card-value {
+  font-size: 0.88rem;
+  color: var(--color-text-primary);
+  text-align: right;
+  word-break: break-word;
+}
+
+.card-id {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+/* Card footer */
+.card-footer {
+  padding: 0.75rem 1.2rem;
+  border-top: 1px solid #e9edf5;
+  display: flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+  background: #f9fafd;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   STATE CONTAINERS (loading / empty)
+═══════════════════════════════════════════════════════════════ */
+.state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem 1rem;
+  text-align: center;
+}
+
+.state-text {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.state-subtext {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  max-width: 340px;
+}
+
+.empty-icon {
+  font-size: 4rem;
+}
+
+/* Loading spinner */
+.spinner {
+  width: 46px;
+  height: 46px;
+  border: 5px solid var(--color-primary-light);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   404 PAGE
+═══════════════════════════════════════════════════════════════ */
+.not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 4rem 1rem;
+}
+
+.not-found h2 {
+  font-size: 1.6rem;
+  color: var(--color-text-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════════════════════ */
+.footer {
+  background-color: var(--color-primary);
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  padding: 0.9rem 1rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE ADJUSTMENTS
+═══════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .navbar {
+    padding: 0 1rem;
+  }
+
+  .navbar-title {
+    font-size: 1rem;
+  }
+
+  .main-content {
+    padding: 1.2rem 1rem;
+  }
+
+  .form-container {
+    padding: 1.4rem 1.1rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .list-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}

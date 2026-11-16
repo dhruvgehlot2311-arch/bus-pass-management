@@ -1,0 +1,35 @@
+[
+  {
+    "id": "1700000000001",
+    "studentName": "Aarav Sharma",
+    "rollNo": "CS2201",
+    "route": "Route-A: Andheri to College",
+    "busNo": "MH-01-AB-1234",
+    "passType": "Monthly",
+    "contactNo": "9876543210",
+    "isActive": true,
+    "createdAt": "2026-01-10T08:00:00.000Z"
+  },
+  {
+    "id": "1700000000002",
+    "studentName": "Priya Mehta",
+    "rollNo": "CS2202",
+    "route": "Route-B: Borivali to College",
+    "busNo": "MH-01-CD-5678",
+    "passType": "Quarterly",
+    "contactNo": "9123456789",
+    "isActive": true,
+    "createdAt": "2026-01-15T09:30:00.000Z"
+  },
+  {
+    "id": "1700000000003",
+    "studentName": "Rahul Verma",
+    "rollNo": "CS2203",
+    "route": "Route-C: Thane to College",
+    "busNo": "MH-01-EF-9012",
+    "passType": "Annual",
+    "contactNo": "9988776655",
+    "isActive": false,
+    "createdAt": "2026-02-01T07:45:00.000Z"
+  }
+]

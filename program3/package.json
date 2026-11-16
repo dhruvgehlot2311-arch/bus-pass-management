@@ -1,0 +1,12 @@
+{
+  "name": "bus-pass-node",
+  "version": "1.0.0",
+  "description": "Bus Pass Management System - Node.js server-side utility without Express",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Roll No: 14",
+  "license": "ISC"
+}

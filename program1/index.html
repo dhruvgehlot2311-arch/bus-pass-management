@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bus Pass Management System</title>
+  <style>
+    /* ===== CSS Reset & Base Styles ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:       #1565C0;
+      --primary-dark:  #0D47A1;
+      --primary-light: #E3F2FD;
+      --accent:        #42A5F5;
+      --white:         #FFFFFF;
+      --bg:            #F0F4F8;
+      --card-bg:       #FFFFFF;
+      --text:          #1A237E;
+      --text-muted:    #546E7A;
+      --border:        #BBDEFB;
+      --success:       #2E7D32;
+      --error:         #C62828;
+      --radius:        10px;
+      --shadow:        0 4px 18px rgba(21,101,192,0.12);
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ===== Header ===== */
+    header {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 60%, var(--accent) 100%);
+      color: var(--white);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    }
+
+    header .logo {
+      font-size: 2.4rem;
+    }
+
+    header .header-text h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    header .header-text p {
+      font-size: 0.85rem;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+
+    /* ===== Layout ===== */
+    .container {
+      max-width: 1100px;
+      margin: 32px auto;
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* ===== Card ===== */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .card-header {
+      background: var(--primary-light);
+      border-bottom: 2px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-header h2 {
+      font-size: 1.1rem;
+      color: var(--primary-dark);
+      font-weight: 700;
+    }
+
+    .card-header .icon {
+      font-size: 1.3rem;
+    }
+
+    .card-body {
+      padding: 24px;
+    }
+
+    /* ===== Form Grid ===== */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .form-group input,
+    .form-group select {
+      padding: 10px 13px;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: #F9FBFF;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(21,101,192,0.12);
+      background: var(--white);
+    }
+
+    .form-group input.invalid,
+    .form-group select.invalid {
+      border-color: var(--error);
+      background: #FFF5F5;
+    }
+
+    .error-msg {
+      font-size: 0.75rem;
+      color: var(--error);
+      min-height: 16px;
+    }
+
+    /* ===== Buttons ===== */
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 11px 26px;
+      border: none;
+      border-radius: 7px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--white);
+      box-shadow: 0 2px 8px rgba(21,101,192,0.25);
+    }
+
+    .btn-primary:hover { background: var(--primary-dark); }
+
+    .btn-secondary {
+      background: var(--white);
+      color: var(--primary);
+      border: 1.5px solid var(--primary);
+    }
+
+    .btn-secondary:hover { background: var(--primary-light); }
+
+    .btn-danger {
+      background: #FFEBEE;
+      color: var(--error);
+      border: 1.5px solid #EF9A9A;
+    }
+
+    .btn-danger:hover { background: #FFCDD2; }
+
+    /* ===== Toast Notification ===== */
+    #toast {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      padding: 14px 22px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--white);
+      box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+      opacity: 0;
+      transform: translateY(-12px);
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 9999;
+      pointer-events: none;
+      max-width: 340px;
+    }
+
+    #toast.show { opacity: 1; transform: translateY(0); }
+    #toast.success { background: #2E7D32; }
+    #toast.error   { background: var(--error); }
+    #toast.info    { background: var(--primary); }
+
+    /* ===== Collapsible JSON Block ===== */
+    .collapsible-wrap {
+      margin-top: 18px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .collapsible-toggle {
+      width: 100%;
+      background: var(--primary-light);
+      border: none;
+      padding: 10px 16px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--primary-dark);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .collapsible-toggle:hover { background: #BBDEFB; }
+
+    .collapsible-content {
+      display: none;
+      background: #0D1117;
+      padding: 16px;
+      overflow-x: auto;
+    }
+
+    .collapsible-content.open { display: block; }
+
+    .collapsible-content pre {
+      color: #58A6FF;
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* ===== Search & Filter Bar ===== */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .toolbar input[type="text"] {
+      flex: 1;
+      min-width: 180px;
+      padding: 9px 13px;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      font-size: 0.93rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .toolbar input[type="text"]:focus { border-color: var(--primary); }
+
+    .toolbar select {
+      padding: 9px 13px;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      font-size: 0.93rem;
+      cursor: pointer;
+      outline: none;
+      background: var(--white);
+    }
+
+    .record-count {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+
+    /* ===== Table ===== */
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    thead th {
+      background: var(--primary);
+      color: var(--white);
+      padding: 12px 14px;
+      text-align: left;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    thead th:first-child { border-radius: 0; }
+
+    tbody tr {
+      border-bottom: 1px solid #E3F2FD;
+      transition: background 0.15s;
+    }
+
+    tbody tr:hover { background: #E3F2FD; }
+
+    tbody td {
+      padding: 11px 14px;
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .badge-monthly    { background: #E3F2FD; color: #1565C0; }
+    .badge-quarterly  { background: #E8F5E9; color: #2E7D32; }
+    .badge-annual     { background: #FFF3E0; color: #E65100; }
+
+    .empty-row td {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 36px;
+      font-style: italic;
+    }
+
+    /* ===== Loading Spinner ===== */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 600px) {
+      header { flex-direction: column; text-align: center; padding: 16px; }
+      .btn-row { flex-direction: column; }
+      .btn { width: 100%; justify-content: center; }
+      .toolbar { flex-direction: column; }
+      .record-count { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header>
+  <div class="logo">🚌</div>
+  <div class="header-text">
+    <h1>Bus Pass Management System</h1>
+    <p>Roll No: 14 &nbsp;|&nbsp; Full Stack Development: Web Dev &nbsp;|&nbsp; Program 1 of 5</p>
+  </div>
+</header>
+
+<!-- ===== TOAST ===== -->
+<div id="toast"></div>
+
+<!-- ===== MAIN CONTAINER ===== -->
+<div class="container">
+
+  <!-- ===== FORM CARD ===== -->
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">📋</span>
+      <h2>Issue / Register Bus Pass</h2>
+    </div>
+    <div class="card-body">
+      <form id="passForm" novalidate>
+        <div class="form-grid">
+
+          <!-- Student Name -->
+          <div class="form-group">
+            <label for="studentName">Student Name</label>
+            <input type="text" id="studentName" placeholder="e.g. Riya Sharma" autocomplete="off" />
+            <span class="error-msg" id="err-studentName"></span>
+          </div>
+
+          <!-- Roll No -->
+          <div class="form-group">
+            <label for="rollNo">Roll No</label>
+            <input type="text" id="rollNo" placeholder="e.g. CS2301A" autocomplete="off" />
+            <span class="error-msg" id="err-rollNo"></span>
+          </div>
+
+          <!-- Route -->
+          <div class="form-group">
+            <label for="route">Route</label>
+            <input type="text" id="route" placeholder="e.g. Andheri – Dadar" autocomplete="off" />
+            <span class="error-msg" id="err-route"></span>
+          </div>
+
+          <!-- Bus No -->
+          <div class="form-group">
+            <label for="busNo">Bus No</label>
+            <input type="text" id="busNo" placeholder="e.g. MH-04-BV-7890" autocomplete="off" />
+            <span class="error-msg" id="err-busNo"></span>
+          </div>
+
+          <!-- Pass Type -->
+          <div class="form-group">
+            <label for="passType">Pass Type</label>
+            <select id="passType">
+              <option value="">-- Select --</option>
+              <option value="Monthly">Monthly</option>
+              <option value="Quarterly">Quarterly</option>
+              <option value="Annual">Annual</option>
+            </select>
+            <span class="error-msg" id="err-passType"></span>
+          </div>
+
+          <!-- Contact No -->
+          <div class="form-group">
+            <label for="contactNo">Contact No</label>
+            <input type="tel" id="contactNo" placeholder="10-digit mobile number" maxlength="10" autocomplete="off" />
+            <span class="error-msg" id="err-contactNo"></span>
+          </div>
+
+        </div><!-- /form-grid -->
+
+        <div class="btn-row">
+          <button type="submit" class="btn btn-primary" id="submitBtn">
+            ➕ Issue Pass (POST)
+          </button>
+          <button type="button" class="btn btn-secondary" id="fetchBtn">
+            🔄 Fetch All Passes (GET)
+          </button>
+          <button type="button" class="btn btn-danger" id="clearBtn">
+            🗑️ Clear Form
+          </button>
+        </div>
+      </form>
+
+      <!-- Collapsible POST body -->
+      <div class="collapsible-wrap" id="postWrap" style="display:none;">
+        <button class="collapsible-toggle" onclick="toggleCollapsible('postContent', this)">
+          <span>📤 POST Request Body (JSON)</span>
+          <span>▼</span>
+        </button>
+        <div class="collapsible-content open" id="postContent">
+          <pre id="postJson"></pre>
+        </div>
+      </div>
+
+      <!-- Collapsible GET response -->
+      <div class="collapsible-wrap" id="getWrap" style="display:none;">
+        <button class="collapsible-toggle" onclick="toggleCollapsible('getContent', this)">
+          <span>📥 GET Response Body (JSON)</span>
+          <span>▼</span>
+        </button>
+        <div class="collapsible-content open" id="getContent">
+          <pre id="getJson"></pre>
+        </div>
+      </div>
+
+    </div><!-- /card-body -->
+  </div><!-- /card -->
+
+  <!-- ===== TABLE CARD ===== -->
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">📊</span>
+      <h2>Issued Bus Passes</h2>
+    </div>
+    <div class="card-body">
+
+      <!-- Toolbar: search + filter -->
+      <div class="toolbar">
+        <input type="text" id="searchInput" placeholder="🔍 Search by name or roll no…" oninput="renderTable()" />
+        <select id="filterType" onchange="renderTable()">
+          <option value="">All Pass Types</option>
+          <option value="Monthly">Monthly</option>
+          <option value="Quarterly">Quarterly</option>
+          <option value="Annual">Annual</option>
+        </select>
+        <span class="record-count" id="recordCount">0 record(s)</span>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <table id="passTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Student Name</th>
+              <th>Roll No</th>
+              <th>Route</th>
+              <th>Bus No</th>
+              <th>Pass Type</th>
+              <th>Contact No</th>
+              <th>Issued On</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr class="empty-row">
+              <td colspan="8">No passes issued yet. Fill the form above to get started.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div><!-- /card -->
+
+</div><!-- /container -->
+
+
+<script>
+  // =====================================================================
+  // SECTION 1: In-Memory "Database"
+  // A JS array acts as the mock backend data store.
+  // Each pass object mirrors what a real REST API would store in a DB.
+  // =====================================================================
+  let passDatabase = [];
+  let nextId = 1; // Auto-increment primary key
+
+  // Pre-seed with two demo records so the table isn't empty on load
+  passDatabase.push(
+    { id: nextId++, studentName: "Aarav Mehta",  rollNo: "CS2201A", route: "Borivali – Andheri", busNo: "MH-04-BV-1234", passType: "Monthly",    contactNo: "9876543210", issuedOn: formatDate(new Date()) },
+    { id: nextId++, studentName: "Priya Nair",   rollNo: "CS2305B", route: "Thane – Dadar",     busNo: "MH-03-TH-5678", passType: "Quarterly",  contactNo: "8765432109", issuedOn: formatDate(new Date()) },
+    { id: nextId++, studentName: "Rohit Sharma", rollNo: "IT2201C", route: "Kalyan – CST",      busNo: "MH-05-KL-9012", passType: "Annual",     contactNo: "7654321098", issuedOn: formatDate(new Date()) }
+  );
+
+
+  // =====================================================================
+  // SECTION 2: Utility Helpers
+  // =====================================================================
+
+  /** Format a Date object to a readable string */
+  function formatDate(d) {
+    return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  }
+
+  /** Show a toast notification (type: 'success' | 'error' | 'info') */
+  function showToast(message, type = "success") {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.className = `show ${type}`;
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => { toast.className = ""; }, 3200);
+  }
+
+  /** Toggle a collapsible JSON block; flip the arrow indicator */
+  function toggleCollapsible(contentId, btn) {
+    const el = document.getElementById(contentId);
+    const isOpen = el.classList.toggle("open");
+    btn.querySelector("span:last-child").textContent = isOpen ? "▼" : "▶";
+  }
+
+
+  // =====================================================================
+  // SECTION 3: Input Validation
+  // Validates all form fields; returns true only when everything passes.
+  // Individual error messages are injected beneath each field.
+  // =====================================================================
+  function validateForm() {
+    let valid = true;
+
+    // Helper: set/clear an error message and toggle the 'invalid' CSS class
+    function setError(fieldId, message) {
+      const field = document.getElementById(fieldId);
+      const errEl = document.getElementById("err-" + fieldId);
+      if (message) {
+        field.classList.add("invalid");
+        errEl.textContent = message;
+        valid = false;
+      } else {
+        field.classList.remove("invalid");
+        errEl.textContent = "";
+      }
+    }
+
+    const name    = document.getElementById("studentName").value.trim();
+    const roll    = document.getElementById("rollNo").value.trim();
+    const route   = document.getElementById("route").value.trim();
+    const busNo   = document.getElementById("busNo").value.trim();
+    const type    = document.getElementById("passType").value;
+    const contact = document.getElementById("contactNo").value.trim();
+
+    // All required
+    setError("studentName", name    ? "" : "Student name is required.");
+    setError("route",       route   ? "" : "Route is required.");
+    setError("busNo",       busNo   ? "" : "Bus number is required.");
+    setError("passType",    type    ? "" : "Please select a pass type.");
+
+    // Roll No: alphanumeric (letters + digits), 3–12 chars
+    if (!roll) {
+      setError("rollNo", "Roll number is required.");
+    } else if (!/^[A-Za-z0-9]{3,12}$/.test(roll)) {
+      setError("rollNo", "Roll no must be 3–12 alphanumeric characters.");
+    } else {
+      setError("rollNo", "");
+    }
+
+    // Contact: exactly 10 digits
+    if (!contact) {
+      setError("contactNo", "Contact number is required.");
+    } else if (!/^\d{10}$/.test(contact)) {
+      setError("contactNo", "Contact must be exactly 10 digits.");
+    } else {
+      setError("contactNo", "");
+    }
+
+    return valid;
+  }
+
+
+  // =====================================================================
+  // SECTION 4: Mock Fetch API — POST (simulate issuing a new bus pass)
+  // Uses async/await with a Promise-based delay to mimic a real HTTP call.
+  // The returned "response" is a JSON object just like a real REST API.
+  // =====================================================================
+  async function mockPostPass(data) {
+    // Simulate network latency (400 ms)
+    await new Promise(resolve => setTimeout(resolve, 400));
+
+    // Build the new record
+    const newPass = {
+      id:          nextId++,
+      studentName: data.studentName,
+      rollNo:      data.rollNo,
+      route:       data.route,
+      busNo:       data.busNo,
+      passType:    data.passType,
+      contactNo:   data.contactNo,
+      issuedOn:    formatDate(new Date())
+    };
+
+    passDatabase.push(newPass); // Persist to in-memory DB
+
+    // Simulated HTTP 201 Created response
+    return { status: 201, message: "Pass issued successfully.", data: newPass };
+  }
+
+
+  // =====================================================================
+  // SECTION 5: Mock Fetch API — GET (simulate fetching all passes)
+  // Returns the entire in-memory database as a JSON "response".
+  // =====================================================================
+  async function mockGetPasses() {
+    // Simulate network latency (300 ms)
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // Simulated HTTP 200 OK response
+    return {
+      status:  200,
+      message: "Passes retrieved successfully.",
+      count:   passDatabase.length,
+      data:    passDatabase
+    };
+  }
+
+
+  // =====================================================================
+  // SECTION 6: Form Submit Handler (POST flow)
+  // Triggered when the user clicks "Issue Pass".
+  // 1. Validates input  2. Calls mockPostPass  3. Shows JSON block  4. Re-renders table
+  // =====================================================================
+  document.getElementById("passForm").addEventListener("submit", async function(e) {
+    e.preventDefault(); // Prevent default page reload
+
+    if (!validateForm()) return; // Abort if validation fails
+
+    // Collect form values into a payload object (the simulated request body)
+    const payload = {
+      studentName: document.getElementById("studentName").value.trim(),
+      rollNo:      document.getElementById("rollNo").value.trim(),
+      route:       document.getElementById("route").value.trim(),
+      busNo:       document.getElementById("busNo").value.trim(),
+      passType:    document.getElementById("passType").value,
+      contactNo:   document.getElementById("contactNo").value.trim()
+    };
+
+    // Show loading state on the button
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner"></span> Issuing…`;
+
+    try {
+      const response = await mockPostPass(payload); // Simulate async HTTP POST
+
+      // ── Display the POST request body in a collapsible block ──
+      document.getElementById("postWrap").style.display = "block";
+      document.getElementById("postJson").textContent =
+        JSON.stringify({ method: "POST", endpoint: "/api/passes", body: payload }, null, 2);
+
+      // Open the POST block, hide the GET block (keep UI clean)
+      document.getElementById("postContent").classList.add("open");
+      document.getElementById("getWrap").style.display = "none";
+
+      showToast(`✅ ${response.message}`, "success");
+      renderTable(); // Refresh the displayed table
+      clearForm();   // Reset the form fields
+
+    } catch (err) {
+      showToast("❌ Failed to issue pass. Try again.", "error");
+    } finally {
+      // Restore button state
+      btn.disabled = false;
+      btn.innerHTML = "➕ Issue Pass (POST)";
+    }
+  });
+
+
+  // =====================================================================
+  // SECTION 7: Fetch All Passes Handler (GET flow)
+  // Triggered by "Fetch All Passes" button.
+  // Calls mockGetPasses and displays the JSON response in a collapsible block.
+  // =====================================================================
+  document.getElementById("fetchBtn").addEventListener("click", async function() {
+    const btn = this;
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner"></span> Fetching…`;
+
+    try {
+      const response = await mockGetPasses(); // Simulate async HTTP GET
+
+      // ── Display the GET response in a collapsible block ──
+      document.getElementById("getWrap").style.display = "block";
+      document.getElementById("getJson").textContent =
+        JSON.stringify({ method: "GET", endpoint: "/api/passes", response }, null, 2);
+
+      // Open the GET block, hide the POST block
+      document.getElementById("getContent").classList.add("open");
+      document.getElementById("postWrap").style.display = "none";
+
+      showToast(`📥 ${response.count} pass(es) fetched.`, "info");
+      renderTable(); // Re-render the table with latest data
+
+    } catch (err) {
+      showToast("❌ Failed to fetch passes. Try again.", "error");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = "🔄 Fetch All Passes (GET)";
+    }
+  });
+
+
+  // =====================================================================
+  // SECTION 8: Clear Form Handler
+  // Resets all form fields and clears all validation error messages.
+  // =====================================================================
+  document.getElementById("clearBtn").addEventListener("click", clearForm);
+
+  function clearForm() {
+    document.getElementById("passForm").reset();
+    // Clear all error messages and invalid highlights
+    ["studentName", "rollNo", "route", "busNo", "passType", "contactNo"].forEach(id => {
+      document.getElementById(id).classList.remove("invalid");
+      document.getElementById("err-" + id).textContent = "";
+    });
+  }
+
+
+  // =====================================================================
+  // SECTION 9: Table Rendering with Search & Filter
+  // Reads the current state of passDatabase, applies search and filter,
+  // then dynamically builds and injects <tr> elements into the table body.
+  // =====================================================================
+  function renderTable() {
+    const searchVal = document.getElementById("searchInput").value.trim().toLowerCase();
+    const filterVal = document.getElementById("filterType").value;
+    const tbody     = document.getElementById("tableBody");
+
+    // Apply search (name or roll no) and pass-type filter
+    const filtered = passDatabase.filter(pass => {
+      const matchSearch =
+        !searchVal ||
+        pass.studentName.toLowerCase().includes(searchVal) ||
+        pass.rollNo.toLowerCase().includes(searchVal);
+
+      const matchFilter = !filterVal || pass.passType === filterVal;
+
+      return matchSearch && matchFilter;
+    });
+
+    // Update record count badge
+    document.getElementById("recordCount").textContent = `${filtered.length} record(s)`;
+
+    // Build table rows
+    if (filtered.length === 0) {
+      tbody.innerHTML = `
+        <tr class="empty-row">
+          <td colspan="8">No passes match your search / filter.</td>
+        </tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map((pass, idx) => {
+      // Assign a colour-coded badge based on pass type
+      const badgeClass =
+        pass.passType === "Monthly"   ? "badge-monthly"   :
+        pass.passType === "Quarterly" ? "badge-quarterly" : "badge-annual";
+
+      return `
+        <tr>
+          <td>${idx + 1}</td>
+          <td><strong>${escapeHtml(pass.studentName)}</strong></td>
+          <td>${escapeHtml(pass.rollNo)}</td>
+          <td>${escapeHtml(pass.route)}</td>
+          <td>${escapeHtml(pass.busNo)}</td>
+          <td><span class="badge ${badgeClass}">${escapeHtml(pass.passType)}</span></td>
+          <td>${escapeHtml(pass.contactNo)}</td>
+          <td>${escapeHtml(pass.issuedOn)}</td>
+        </tr>`;
+    }).join("");
+  }
+
+  /** Sanitise user-supplied strings before injecting into innerHTML */
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+
+  // =====================================================================
+  // SECTION 10: Initialisation
+  // Render the pre-seeded data when the page first loads.
+  // =====================================================================
+  renderTable();
+
+</script>
+</body>
+</html>
